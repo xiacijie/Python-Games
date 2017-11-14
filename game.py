@@ -1,5 +1,5 @@
 import pygame,sys,time
-import random
+import random,math
 #RBG color setting
 black = (0,0,0)
 white = (255,255,255)
@@ -9,34 +9,43 @@ blue = (0,255,255)
 screen_size = 800
 seg_size = 15
 speed = 0.36
-FPS =15
+FPS =12
 #initialize screen
 screen = pygame.display.set_mode((screen_size,screen_size))
 
-clock= pygame.time.Clock()
+clock = pygame.time.Clock()
 
 def main():
 	
 	pygame.init()
 	game = Game()
 	game.play()
-		
-		
+				
 class Game:
 	def __init__(self):
 	
 		self.snake = Snake()
 		self.game_play = True
-		
+		self.apple = Apple()
+	def draw_boundary():
+		boundary = pygame.Rect(0,0,screen_size,screen_size)
+		pygame.draw.rect()
 	def play(self):
-		global clock
+		self.snake.snake_grow()
+		self.snake.snake_grow()
+		self.snake.snake_grow()
+		self.apple.randomize()
+
 		while self.game_play:
 			
-			
 			clock.tick(FPS)
+			self.apple.draw()
 			self.snake.draw_snake()
 			self.get_key()
 			self.snake.snake_move()
+			if self.if_snake_eat_apple():
+				self.snake.snake_grow()
+				self.apple.randomize()
 			if self.snake.if_snake_dies():
 				self.game_play = False
 
@@ -63,100 +72,123 @@ class Game:
 				elif event.key == pygame.K_RIGHT:
 					self.snake.change_direction("right")
 				return 1
+	def if_snake_eat_apple(self):
+		if self.snake.head.rect.collidepoint(self.apple.x_coord,self.apple.y_coord):
+			return True
 
 
 	
 class Segment:
 	def __init__(self,left,top):
-		global seg_size,speed,FPS
-		self.top = top
-		self.left = left
-		self.direction = "up"
-		self.x_speed = 0
-		self.y_speed = speed*FPS
+		
 		self.rect = pygame.Rect(left,top,seg_size,seg_size)
 		self.prev = None
-		
-
+		self.next = None
+		self.direction = "up"
 class Snake:
 	def __init__(self):
 
-		global screen_size,seg_size
-		self.snack_stack = []
-		
-
-		top = ((screen_size//seg_size)//2)*seg_size
-		left = top
-		self.head = Segment(top,left)
-
-
-		self.snack_stack.append(self.head)
-		self.body1= Segment(self.head.rect.left,self.head.rect.top+seg_size)
-		
-		self.body1.prev = self.head
-
-		self.body2 = Segment(self.body1.rect.left,self.body1.rect.top+seg_size)
-	
-		self.body2.prev = self.body1
-
-		self.snack_stack.append(self.body1)
-		self.snack_stack.append(self.body2)
-		self.order = 0
+		self.head = Segment(((screen_size//seg_size)//2)*seg_size, ((screen_size//seg_size)//2)*seg_size)
+		self.length = 1
+		self.head_direction = "up"
+		self.x_speed = 0
+		self.y_speed = -seg_size
 
 	def draw_snake(self):
-		global screen,white
-		for seg in self.snack_stack:
-			r = random.randint(0,255)
-			b = random.randint(0,255)
-			g = random.randint(0,255)
-			pygame.draw.rect(screen,(r,b,g),seg.rect,5)
+
+		current = self.head
+		while current!= None:
+			pygame.draw.rect(screen,blue,current.rect,5)
+			current = current.next
+
+	# To be modified, how to make the snake turn around
+	def snake_move(self):
+
+		prev = None
+
+		tail = self.head
+		while tail.next != None:
+			tail = tail.next
+
+		while tail.prev != None:
+			tail.rect.move_ip(tail.prev.rect.left-tail.rect.left, tail.prev.rect.top-tail.rect.top)
+			tail.direction = tail.prev.direction
+			tail = tail.prev
+
+		self.set_speed()
+		self.head.rect.move_ip(self.x_speed,self.y_speed)
+
+			
 
 	
-	def snake_move(self): 
-		
-		for seg in self.snack_stack:
-			self.seg_move(seg)
 
-		
-			
-		
+	def snake_grow(self):
+
+		last = self.head
+		while last.next != None:
+			last = last.next
+
+		if last.direction == "up":
+			top = last.rect.top + seg_size
+			left = last.rect.left
+		elif last.direction == "down":
+			top = last.rect.top -seg_size
+			left = last.rect.left
+		elif last.direction == "left":
+			top = last.rect.top
+			left = last.rect.left + seg_size
+		else:
+			top = last.rect.top
+			left = last.rect.left - seg_size	
+		new_seg = Segment(left,top)
+		new_seg.prev = last
+		last.next = new_seg
+		self.length += 1
+
+
 	def if_snake_dies(self):
-		global screen_size
-		if self.snack_stack[0].rect.top == 0:
-			return True
-		elif self.snack_stack[0].rect.right == screen_size:
-			return True
 
-		elif self.snack_stack[0].rect.left == 0:
+		if self.head.rect.top == 0:
 			return True
-		elif self.snack_stack[0].rect.bottom == screen_size:
+		elif self.head.rect.right == screen_size:
 			return True
 
-	def set_speed(self,seg):
+		elif self.head.rect.left == 0:
+			return True
+		elif self.head.rect.bottom == screen_size:
+			return True
 
-		global FPS,speed
+	def set_speed(self):
 
-		inner_speed = FPS*speed
-		if seg.direction == "up":
+	
+		if self.head.direction == "up":
 			x_speed = 0
-			y_speed = -inner_speed
-		elif seg.direction == "down":
+			y_speed = -seg_size
+		elif self.head.direction == "down":
 			x_speed = 0
-			y_speed = inner_speed
-		elif seg.direction == "left":
-			x_speed = -inner_speed
+			y_speed = seg_size
+		elif self.head.direction == "left":
+			x_speed = -seg_size
 			y_speed = 0
-		elif seg.direction == "right":
-			x_speed = inner_speed
+		elif self.head.direction == "right":
+			x_speed = seg_size
 			y_speed = 0
-		seg.x_speed = x_speed
-		seg.y_speed = y_speed
+		self.x_speed = x_speed
+		self.y_speed = y_speed
 
 	def change_direction(self,direction):
-		self.snack_stack[0].direction = direction
+		self.head_direction = direction
+		self.head.direction = direction
+
+class Apple:
+	def draw(self):
+		pygame.draw.circle(screen,white,(self.x_coord,self.y_coord),5,0)
+	def randomize(self):
+		self.x_coord = random.randint(5,screen_size-5)
+		self.y_coord = random.randint(5,screen_size-5)
 		
 
-
+		
 
 
 
