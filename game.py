@@ -31,11 +31,15 @@ def main():
 	game = Game()
 	game.play()
 
-
+# draw the string to the screen
 def draw_text(content,font_size,coords,color):
 	myfont = pygame.font.SysFont(None,font_size)
 	textsurface = myfont.render(content,1,color)
 	screen.blit(textsurface,coords)
+
+#To be complete
+def get_input():
+	pass
 
 class Game:
 	def __init__(self):
@@ -83,6 +87,7 @@ class Game:
 			if self.if_snake_eat_apple():
 				self.snake.snake_grow()
 				self.apple.randomize()
+
 			if self.snake.if_snake_dies():
 				if self.end_screen():
 					main()
@@ -141,14 +146,6 @@ class Game:
 					else:
 						return True
 						break
-
-
-
-
-	
-
-		
-
 
 	def if_snake_eat_apple(self):
 		if self.snake.head.rect.colliderect(self.apple.rect):
@@ -268,7 +265,6 @@ class Snake:
 		elif direction == "right" and self.head_direction == "left":
 			return 
 
-	
 		self.head_direction = direction
 		self.head.direction = direction
 
