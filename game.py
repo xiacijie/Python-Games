@@ -8,23 +8,22 @@ pygame.font.init()
 #RBG color setting
 black = (0,0,0)
 white = (255,255,255)
-blue = (0,255,255)
-green = (0,255,0)
+blue = (25,25,112)
+green = (0,100,0)
 red = (255,0,0)
 grey = (205,201,201)
 yellow = (255,255,0)
+purple = (160,32,240)
 #size setting 
-screen_size = 800
+screen_size = 600
 seg_size = 15
 speed = 0.36
-FPS =12
+FPS = 10
 #initialize screen
 screen = pygame.display.set_mode((screen_size,screen_size))
 
 clock = pygame.time.Clock()
-
-
-
+back_groung_pic = pygame.image.load("grass.jpg")
 def main():
 	
 
@@ -32,8 +31,8 @@ def main():
 	game.play()
 
 def draw_text(content,font_size,coords,color):
-	myfont = pygame.font.SysFont('Comic Sans MS',1,white)
-	textsurface = myfont.render(content,False,color)
+	myfont = pygame.font.SysFont(None,font_size)
+	textsurface = myfont.render(content,1,color)
 	screen.blit(textsurface,coords)
 
 class Game:
@@ -42,10 +41,25 @@ class Game:
 		self.snake = Snake()
 		self.game_play = True
 		self.apple = Apple()
+		self.start_time = time.time()
+		self.level = 1
+		self.score_add = 5
+		self.stored_length = 0
+	def show_score(self):
+		score = self.snake.length * self.score_add - 20
+		draw_text("Score:%d"%score,45,(20,10),blue)
+
+	def show_time(self):
+		time1 = time.time()-self.start_time
+		draw_text("Time:%d"%time1,45,(250,10),blue)
+
+	def show_level(self):
+		draw_text("Level:%d"%self.level,45,(450,10),blue)
+
 
 	def draw_boundary(self):
 		boundary = pygame.Rect(0,0,screen_size,screen_size)
-		pygame.draw.rect(screen,blue,boundary,15)
+		pygame.draw.rect(screen,black,boundary,15)
 
 	def play(self):
 
@@ -55,25 +69,24 @@ class Game:
 		while self.game_play:
 			
 			clock.tick(FPS)
-			
+			self.show_score()
+			self.show_time()
+			self.show_level()
 			self.draw_boundary()
 			self.apple.draw()
 			self.snake.draw_snake()
 			self.get_key()
 			self.snake.snake_move()
+			self.level_up()
 			if self.if_snake_eat_apple():
 				self.snake.snake_grow()
 				self.apple.randomize()
 			if self.snake.if_snake_dies():
 				self.game_play = False
-			
+
 			pygame.display.flip()
 			pygame.display.update()
-			screen.fill(grey)	
-			
-
-			
-			
+			screen.blit(back_groung_pic,(0,0))	
 			
 	def get_key(self): #Get the user input through the key board
 		for event in pygame.event.get():
@@ -91,13 +104,30 @@ class Game:
 					self.snake.change_direction("right")
 				return 1
 
+	def level_up(self):
+		global FPS
+		
+		snake_length = self.snake.length
+		up = False
+		if snake_length == 8 or snake_length == 15 or snake_length == 25 or snake_length == 30 or snake_length == 40 or snake_length == 50 or snake_length == 60 or snake_length == 70:
+			up = True
+			
+
+		if up and self.stored_length != snake_length:
+			FPS += 3
+			self.level += 1
+			self.score_add += 5
+			draw_text("LEVEL UP!",40,(220,300),red)
+			pygame.display.update()
+			time.sleep(1)
+			self.stored_length = snake_length
+		
+
+
 	def if_snake_eat_apple(self):
-		if self.snake.head.rect.collidepoint(self.apple.x_coord,self.apple.y_coord):
+		if self.snake.head.rect.colliderect(self.apple.rect):
 			return True
 
-class Board:
-	def __init__(self):
-		point = 0
 	
 class Segment:
 	def __init__(self,left,top):
@@ -106,6 +136,7 @@ class Segment:
 		self.prev = None
 		self.next = None
 		self.direction = "up"
+
 class Snake:
 	def __init__(self):
 
@@ -118,10 +149,10 @@ class Snake:
 	def draw_snake(self):
 
 		current = self.head
-		pygame.draw.rect(screen,yellow,current.rect,4)
+		pygame.draw.rect(screen,yellow,current.rect,0)
 		current =current.next
 		while current!= None:
-			pygame.draw.rect(screen,green,current.rect,3)
+			pygame.draw.rect(screen,green,current.rect,0)
 			current = current.next
 
 	# To be modified, how to make the snake turn around
@@ -140,10 +171,6 @@ class Snake:
 
 		self.set_speed()
 		self.head.rect.move_ip(self.x_speed,self.y_speed)
-
-			
-
-	
 
 	def snake_grow(self):
 
@@ -220,11 +247,13 @@ class Snake:
 		self.head.direction = direction
 
 class Apple:
+
 	def draw(self):
-		pygame.draw.circle(screen,red,(self.x_coord,self.y_coord),5,0)
+		pygame.draw.rect(screen,red,self.rect,15)
 	def randomize(self):
-		self.x_coord = random.randint(15,screen_size-15)
-		self.y_coord = random.randint(15,screen_size-15)
+		left = random.randint(15,screen_size-15)
+		top = random.randint(35,screen_size-15)
+		self.rect = pygame.Rect(left,top,10,10)
 		
 
 		
