@@ -1,5 +1,6 @@
 import pygame,sys,time
 import random,math
+import sqlite3
 
 pygame.init()
 pygame.font.init()
@@ -29,6 +30,7 @@ def main():
 
 	game = Game()
 	game.play()
+
 
 def draw_text(content,font_size,coords,color):
 	myfont = pygame.font.SysFont(None,font_size)
@@ -82,6 +84,9 @@ class Game:
 				self.snake.snake_grow()
 				self.apple.randomize()
 			if self.snake.if_snake_dies():
+				if self.end_screen():
+					main()
+				
 				self.game_play = False
 
 			pygame.display.flip()
@@ -102,7 +107,7 @@ class Game:
 					self.snake.change_direction("left")
 				elif event.key == pygame.K_RIGHT:
 					self.snake.change_direction("right")
-				return 1
+				
 
 	def level_up(self):
 		global FPS
@@ -121,6 +126,27 @@ class Game:
 			pygame.display.update()
 			time.sleep(1)
 			self.stored_length = snake_length
+
+	def end_screen(self):
+		
+		while 1:
+			screen.blit(back_groung_pic,(0,0))
+			draw_text("PLAY AGAIN Y/N",40,(200,300),black)
+			pygame.display.update()
+			for event in pygame.event.get():
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_n:
+						return False
+						break
+					else:
+						return True
+						break
+
+
+
+
+	
+
 		
 
 
@@ -255,9 +281,4 @@ class Apple:
 		top = random.randint(35,screen_size-15)
 		self.rect = pygame.Rect(left,top,10,10)
 		
-
-		
-
-
-
 main()
