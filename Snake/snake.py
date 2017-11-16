@@ -25,9 +25,16 @@ screen = pygame.display.set_mode((screen_size,screen_size))
 
 clock = pygame.time.Clock()
 back_groung_pic = pygame.image.load("grass.jpg")
-def main():
-	
 
+#Connection to the database
+connection = None
+cursor = None
+
+
+def main():
+	global connection,cursor
+	connection = sqlite3.connect("score.db")
+	cursor = connection.cursor()
 	game = Game()
 	game.play()
 
@@ -37,7 +44,7 @@ def draw_text(content,font_size,coords,color):
 	textsurface = myfont.render(content,1,color)
 	screen.blit(textsurface,coords)
 
-#To be complete
+#To be completed
 def get_input():
 	pass
 
@@ -51,13 +58,14 @@ class Game:
 		self.level = 1
 		self.score_add = 5
 		self.stored_length = 0
+
 	def show_score(self):
-		score = self.snake.length * self.score_add - 20
-		draw_text("Score:%d"%score,45,(20,10),blue)
+		self.score = self.snake.length * self.score_add - 20
+		draw_text("Score:%d"%self.score,45,(20,10),blue)
 
 	def show_time(self):
-		time1 = time.time()-self.start_time
-		draw_text("Time:%d"%time1,45,(250,10),blue)
+		self.time1 = time.time()-self.start_time
+		draw_text("Time:%d"%self.time1,45,(250,10),blue)
 
 	def show_level(self):
 		draw_text("Level:%d"%self.level,45,(450,10),blue)
@@ -89,10 +97,13 @@ class Game:
 				self.apple.randomize()
 
 			if self.snake.if_snake_dies():
+				self.store_into_database()
 				if self.end_screen():
 					main()
 				
 				self.game_play = False
+				connection.close()
+
 
 			pygame.display.flip()
 			pygame.display.update()
@@ -150,6 +161,19 @@ class Game:
 	def if_snake_eat_apple(self):
 		if self.snake.head.rect.colliderect(self.apple.rect):
 			return True
+
+	def store_into_database(self):
+		cursor.execute("select count(*) from score;")
+		num_of_pid = cursor.fetchone()
+
+		if num_of_pid == None:
+			new_pid = 1
+		else:
+			new_pid = num_of_pid[0] + 1
+		data_record = (new_pid,self.score,self.level,self.time1)
+		cursor.execute("insert into score values (?,?,?,?);",data_record)
+		connection.commit()
+
 
 	
 class Segment:
