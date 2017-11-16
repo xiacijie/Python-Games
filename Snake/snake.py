@@ -58,34 +58,50 @@ class Game:
 		self.level = 1
 		self.score_add = 5
 		self.stored_length = 0
+		self.fps = FPS
 
-	def show_score(self):
+	def show_score(self,coords,font_size):
 		self.score = self.snake.length * self.score_add - 20
-		draw_text("Score:%d"%self.score,45,(20,10),blue)
+		draw_text("Score:%d"%self.score,font_size,coords,blue)
 
-	def show_time(self):
+	def show_time(self,coords,font_size):
 		self.time1 = time.time()-self.start_time
-		draw_text("Time:%d"%self.time1,45,(250,10),blue)
+		draw_text("Time:%d"%self.time1,font_size,coords,blue)
 
-	def show_level(self):
-		draw_text("Level:%d"%self.level,45,(450,10),blue)
+	def show_level(self,coords,font_size):
+		draw_text("Level:%d"%self.level,font_size,coords,blue)
+
+	def get_highest_score(self):
+		cursor.execute("select max(score) from score;")
+		row = cursor.fetchone()
+		if row[0] == None:
+			highest_score = 0
+		else:
+			highest_score = row[0]
+		return highest_score
+
+	def show_highest_score(self,coords,font_size):
+		draw_text("Highest Score:%d"%self.get_highest_score(),font_size,coords,blue)
+
 
 
 	def draw_boundary(self):
 		boundary = pygame.Rect(0,0,screen_size,screen_size)
 		pygame.draw.rect(screen,black,boundary,15)
 
+	#The key method, controlling the whole game 
 	def play(self):
-
+		
 		self.apple.randomize()
 		for i in range(0,3):
 			self.snake.snake_grow()
 		while self.game_play:
 			
 			clock.tick(FPS)
-			self.show_score()
-			self.show_time()
-			self.show_level()
+			self.show_highest_score((10,15),30)
+			self.show_score((250,15),30)
+			self.show_time((350,15),30)
+			self.show_level((450,15),30)
 			self.draw_boundary()
 			self.apple.draw()
 			self.snake.draw_snake()
@@ -97,8 +113,9 @@ class Game:
 				self.apple.randomize()
 
 			if self.snake.if_snake_dies():
+				prev_high_score = self.get_highest_score()
 				self.store_into_database()
-				if self.end_screen():
+				if self.end_screen(prev_high_score):
 					main()
 				
 				self.game_play = False
@@ -135,19 +152,23 @@ class Game:
 			
 
 		if up and self.stored_length != snake_length:
-			FPS += 3
+			self.fps += 3
 			self.level += 1
 			self.score_add += 5
-			draw_text("LEVEL UP!",40,(220,300),red)
+			draw_text("LEVEL UP",60,(220,300),yellow)
 			pygame.display.update()
 			time.sleep(1)
 			self.stored_length = snake_length
 
-	def end_screen(self):
+	def end_screen(self,prev_high_score):
 		
+		show_congrats = (self.score>prev_high_score)
 		while 1:
 			screen.blit(back_groung_pic,(0,0))
-			draw_text("PLAY AGAIN Y/N",40,(200,300),black)
+			if show_congrats:
+				draw_text("New Highest Score Reached",40,(128,100),blue)
+			draw_text("You Final Score:%d"%self.score,40,(170,200),blue)
+			draw_text("Play Again Y/N",30,(230,300),blue)
 			pygame.display.update()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN:
@@ -164,12 +185,12 @@ class Game:
 
 	def store_into_database(self):
 		cursor.execute("select count(*) from score;")
-		num_of_pid = cursor.fetchone()
+		row = cursor.fetchone()
 
-		if num_of_pid == None:
+		if row == None:
 			new_pid = 1
 		else:
-			new_pid = num_of_pid[0] + 1
+			new_pid = row[0] + 1
 		data_record = (new_pid,self.score,self.level,self.time1)
 		cursor.execute("insert into score values (?,?,?,?);",data_record)
 		connection.commit()
