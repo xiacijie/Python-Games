@@ -25,7 +25,7 @@ screen = pygame.display.set_mode((screen_size,screen_size))
 
 clock = pygame.time.Clock()
 back_groung_pic = pygame.image.load("grass.jpg")
-
+pygame.mixer.music.load("back1.mp3")
 #Connection to the database
 connection = None
 cursor = None
@@ -91,7 +91,7 @@ class Game:
 
 	#The key method, controlling the whole game 
 	def play(self):
-		
+		pygame.mixer.music.play(0,0)
 		self.apple.randomize()
 		for i in range(0,3):
 			self.snake.snake_grow()
@@ -99,7 +99,7 @@ class Game:
 			
 			clock.tick(FPS)
 			self.show_highest_score((10,15),30)
-			self.show_score((250,15),30)
+			self.show_score((215,15),30)
 			self.show_time((350,15),30)
 			self.show_level((450,15),30)
 			self.draw_boundary()
@@ -113,6 +113,7 @@ class Game:
 				self.apple.randomize()
 
 			if self.snake.if_snake_dies():
+				pygame.mixer.music.stop()
 				prev_high_score = self.get_highest_score()
 				self.store_into_database()
 				if self.end_screen(prev_high_score):
