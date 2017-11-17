@@ -1,4 +1,4 @@
-import pygame,sys
+import pygame,sys,random
 pygame.init()
 pygame.font.init()
 
@@ -8,7 +8,9 @@ black = (0,0,0)
 white = (255,255,255)
 deep_blue = (25,25,112)
 blue = (0,0,255)
+shalow_blue = (0,153,255)
 green = (0,100,0)
+bright_green = (0,255,0)
 red = (255,0,0)
 grey = (205,201,201)
 yellow = (255,255,0)
@@ -17,14 +19,14 @@ purple = (160,32,240)
 screen_size = 600
 seg_size = 15
 speed = 0.36
-brick_width = 100
+brick_width = 50
 brick_height = 20
 FPS = 60
 #initialize screen
 screen = pygame.display.set_mode((screen_size,screen_size))
 pygame.key.set_repeat(10,5)
 clock = pygame.time.Clock()
-#back_groung_pic = pygame.image.load("grass.jpg")
+back_groung_pic = pygame.image.load("back.jpg")
 #pygame.mixer.music.load("back1.mp3")
 #Connection to the database
 connection = None
@@ -33,22 +35,38 @@ def main():
 	game = Game()
 	game.play()
 
+# draw the string to the screen
+def draw_text(content,font_size,coords,color):
+	myfont = pygame.font.SysFont(None,font_size)
+	textsurface = myfont.render(content,1,color)
+	screen.blit(textsurface,coords)
+
 class Game:
 	def __init__(self):
 		self.ball = Ball()
 		self.game_play  = True
 		self.board = Board()
 		self.brick_list = []
+		self.score = 0
 
 	def create_bricks(self):
-		top = 0
-		for i in range(5):
+		top = 50
+		for i in range(8):
 			left = 0
 			for j in range(screen_size//brick_width):
-				new_brick = Brick(left,top,white)
+				r = random.randint(0,255)
+				b = random.randint(0,255)
+				g = random.randint(0,255)
+				color = (r,b,g)
+				new_brick = Brick(left,top,color)
 				self.brick_list.append(new_brick)
 				left += brick_width
 			top += brick_height
+
+	def show_score(self):
+		font_size = 40
+		coords = (10,10)
+		draw_text("Score:%d"%self.score,font_size,coords,bright_green)
 
 	def draw_bricks(self):
 		for brick in self.brick_list:
@@ -65,6 +83,7 @@ class Game:
 			self.ball.bounce_edge()
 			
 			self.board.draw()
+			self.show_score()
 			self.get_key()
 			if self.if_ball_hit_board():
 				self.ball.bounce_board()
@@ -77,7 +96,7 @@ class Game:
 
 			
 			pygame.display.update()
-			screen.fill(black)
+			screen.blit(back_groung_pic,(0,0))
 
 	def get_key(self): #Get the user input through the key board
 		for event in pygame.event.get():
@@ -107,6 +126,7 @@ class Game:
 		for brick in self.brick_list:
 			if brick.rect.collidepoint(self.ball.x_coord,self.ball.y_coord):
 				self.brick_list.remove(brick)
+				self.score += 5
 				return True
 
 
@@ -119,8 +139,8 @@ class Brick: # single brick
 		self.rect = pygame.Rect(left,top,brick_width,brick_height)
 
 	def draw(self):
-		pygame.draw.rect(screen,blue,self.rect,0) # draw bricks
-		pygame.draw.rect(screen,deep_blue,self.rect,1) #draw the border
+		pygame.draw.rect(screen,self.color,self.rect,0) # draw bricks
+		pygame.draw.rect(screen,black,self.rect,1) #draw the border
 
 
 
@@ -133,7 +153,11 @@ class Ball: # single ball
 		self.radius = 5
 
 	def draw(self):
-		pygame.draw.circle(screen,white,(self.x_coord,self.y_coord),self.radius,0)
+		r = random.randint(0,255)
+		b = random.randint(0,255)
+		g = random.randint(0,255)
+		color = (r,b,g)
+		pygame.draw.circle(screen,yellow,(self.x_coord,self.y_coord),self.radius,0)
 
 	def move(self):
 		self.x_coord += self.x_speed
@@ -169,7 +193,7 @@ class Board:
 		self.y_speed = 0
 
 	def draw(self):
-		pygame.draw.rect(screen,white,self.rect,0)
+		pygame.draw.rect(screen,grey,self.rect,0)
 
 	def move(self,direction): # constraint the moving range
 		if direction == "left":
