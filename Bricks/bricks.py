@@ -120,11 +120,11 @@ class Ball: # single ball
 
 class Board:
 	def __init__(self):
-		self.width = 300
+		self.width = 100
 		self.left = screen_size/2-0.5*self.width
 		self.top = 560
 		self.rect = pygame.Rect(self.left,self.top,self.width,5)
-		self.x_speed = 50
+		self.x_speed = 10
 		self.y_speed = 0
 
 	def draw(self):
@@ -132,17 +132,19 @@ class Board:
 
 	def move(self,direction): # constraint the moving range
 		if direction == "left":
-			if self.x_speed > self.left:
-				self.x_speed = self.left
+			if self.x_speed > self.rect.left:
+				self.x_speed = self.rect.left
 		
-			print(self.x_speed)
+			
 			self.rect.move_ip(-self.x_speed,self.y_speed)
 			
 		else:
-			if self.x_speed > screen_size-(self.left + self.width):
-				self.x_speed = screen_size-(self.left + self.width)
+			if self.x_speed > screen_size-(self.rect.left + self.width):
+				self.x_speed = screen_size-(self.rect.left + self.width)
 			
 			self.rect.move_ip(self.x_speed,self.y_speed)
+
+		self.x_speed = 10
 			
 
 
