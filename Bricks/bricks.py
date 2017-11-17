@@ -27,11 +27,14 @@ screen = pygame.display.set_mode((screen_size,screen_size))
 pygame.key.set_repeat(10,5)
 clock = pygame.time.Clock()
 back_groung_pic = pygame.image.load("back.jpg")
-#pygame.mixer.music.load("back1.mp3")
+pygame.mixer.music.load("back.mp3")
 #Connection to the database
 connection = None
 cursor = None
 def main():
+	global connection,cursor
+	connection = sqlite3.connect("score.db")
+	cursor = connection.cursor()
 	game = Game()
 	game.play()
 
@@ -48,12 +51,13 @@ class Game:
 		self.board = Board()
 		self.brick_list = []
 		self.score = 0
+		self.level = 1
 
 	def create_bricks(self):
 		top = 50
-		for i in range(8):
-			left = 0
-			for j in range(screen_size//brick_width):
+		for i in range(6):
+			left = brick_width
+			for j in range((screen_size-2*brick_width)//brick_width):
 				r = random.randint(0,255)
 				b = random.randint(0,255)
 				g = random.randint(0,255)
@@ -66,7 +70,13 @@ class Game:
 	def show_score(self):
 		font_size = 40
 		coords = (10,10)
-		draw_text("Score:%d"%self.score,font_size,coords,bright_green)
+		draw_text("Score:%d"%self.score,font_size,coords,grey)
+
+	def show_level(self):
+		font_size = 40
+		coords = (250,10)
+		draw_text("Level:%d"%self.level,font_size,coords,grey)
+
 
 	def draw_bricks(self):
 		for brick in self.brick_list:
@@ -74,7 +84,7 @@ class Game:
 
 	def play(self):
 		self.create_bricks()
-
+		pygame.mixer.music.play(0,0)
 		while self.game_play:
 			clock.tick(FPS)
 			self.draw_bricks()
@@ -84,6 +94,7 @@ class Game:
 			
 			self.board.draw()
 			self.show_score()
+			self.show_level()
 			self.get_key()
 			if self.if_ball_hit_board():
 				self.ball.bounce_board()
@@ -92,11 +103,34 @@ class Game:
 				self.ball.bounce_brick()
 
 			if self.if_game_lose():
+				if self.end_screen():
+					main()
 				self.game_play = False
+			if self.if_win():
+				self.restart_game()
 
 			
 			pygame.display.update()
 			screen.blit(back_groung_pic,(0,0))
+
+	def end_screen(self):
+		
+		#show_congrats = (self.score>prev_high_score)
+		while 1:
+			screen.blit(back_groung_pic,(0,0))
+			#if show_congrats:
+				#draw_text("New Highest Score Reached",40,(128,100),blue)
+			    #draw_text("You Final Score:%d"%self.score,40,(170,200),blue)
+			draw_text("Play Again Y/N",30,(230,300),grey)
+			pygame.display.update()
+			for event in pygame.event.get():
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_n:
+						return False
+						break
+					else:
+						return True
+						break	
 
 	def get_key(self): #Get the user input through the key board
 		for event in pygame.event.get():
@@ -129,6 +163,13 @@ class Game:
 				self.score += 5
 				return True
 
+	def if_win(self):
+		return len(self.brick_list) == 0
+
+	def restart_game(self):
+		self.create_bricks()
+		self.level += 1
+		self.ball.reset()
 
 class Brick: # single brick
 	def __init__(self,left,top,color):
@@ -136,7 +177,8 @@ class Brick: # single brick
 		#self.top = top
 		self.color = color
 		
-		self.rect = pygame.Rect(left,top,brick_width,brick_height)
+		self.rect = pygame.Rect(left,top,brick_width,brick_height) #board
+
 
 	def draw(self):
 		pygame.draw.rect(screen,self.color,self.rect,0) # draw bricks
@@ -153,11 +195,9 @@ class Ball: # single ball
 		self.radius = 5
 
 	def draw(self):
-		r = random.randint(0,255)
-		b = random.randint(0,255)
-		g = random.randint(0,255)
-		color = (r,b,g)
-		pygame.draw.circle(screen,yellow,(self.x_coord,self.y_coord),self.radius,0)
+	
+		pygame.draw.circle(screen,black,(self.x_coord,self.y_coord),self.radius,0)
+		pygame.draw.circle(screen,yellow,(self.x_coord,self.y_coord),self.radius,1)
 
 	def move(self):
 		self.x_coord += self.x_speed
@@ -181,6 +221,13 @@ class Ball: # single ball
 
 	def bounce_brick(self):
 		self.y_speed = -self.y_speed
+
+	def reset(self):
+		self.x_coord = 300
+		self.y_coord = 550
+		self.x_speed = 0
+		self.y_speed = -5
+
 			
 
 class Board:
@@ -188,13 +235,13 @@ class Board:
 		self.width = 100
 		self.left = screen_size/2-0.5*self.width
 		self.top = 560
-		self.rect = pygame.Rect(self.left,self.top,self.width,5)
+		self.rect = pygame.Rect(self.left,self.top,self.width,10)
 		self.x_speed = 10
 		self.y_speed = 0
 
 	def draw(self):
 		pygame.draw.rect(screen,grey,self.rect,0)
-
+		pygame.draw.rect(screen,red,self.rect,3)
 	def move(self,direction): # constraint the moving range
 		if direction == "left":
 			if self.x_speed > self.rect.left:
@@ -210,6 +257,9 @@ class Board:
 			self.rect.move_ip(self.x_speed,self.y_speed)
 
 		self.x_speed = 10
+
+	
+
 			
 
 
