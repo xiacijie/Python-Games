@@ -16,7 +16,7 @@ purple = (160,32,240)
 screen_size = 600
 seg_size = 15
 speed = 0.36
-FPS = 180
+FPS = 60
 #initialize screen
 screen = pygame.display.set_mode((screen_size,screen_size))
 pygame.key.set_repeat(10,5)
@@ -48,6 +48,11 @@ class Game:
 			self.get_key()
 			if self.if_ball_hit_board():
 				self.ball.bounce_board()
+
+			if self.if_game_lose():
+				self.game_play = False
+
+			print(self.ball.x_speed,self.ball.y_speed)
 			pygame.display.update()
 			screen.fill(black)
 
@@ -59,10 +64,12 @@ class Game:
 
 				if event.key == pygame.K_LEFT: 
 					self.board.move("left")
-					#self.ball_bounce_board("left")
+					if self.if_ball_hit_board():
+						self.ball.bounce_board("left")
 				elif event.key == pygame.K_RIGHT:
 					self.board.move("right")
-					#self.ball_bounce_board("right")
+					if self.if_ball_hit_board():
+						self.ball.bounce_board("right")
 
 
 	def if_ball_hit_board(self):
@@ -70,7 +77,8 @@ class Game:
 			return True
 
 	def if_game_lose(self):
-		
+		if self.ball.y_coord > screen_size:
+			return True
 
 
 
@@ -83,7 +91,7 @@ class Ball: # single ball
 		self.x_coord = 300
 		self.y_coord = 550
 		self.x_speed = 0
-		self.y_speed = -1
+		self.y_speed = -5
 		self.radius = 5
 
 	def draw(self):
@@ -94,29 +102,32 @@ class Ball: # single ball
 		self.y_coord += self.y_speed
 
 	def bounce_edge(self):
-		if self.x_coord == 0+self.radius or self.x_coord == screen_size - self.radius:
+		if self.x_coord <= 0+self.radius or self.x_coord >= screen_size - self.radius:
 			self.x_speed = -self.x_speed
-		elif self.y_coord == 0+self.radius:
+		elif self.y_coord <= 0+self.radius:
 			self.y_speed = -self.y_speed
 
-	def bounce_board(self):
+	def bounce_board(self,direction = None): # give the ball an x speed when the board is moving
 		
-		self.y_speed = -self.y_speed
-		#if direction == "left":
-			#self.x_speed = -10
-		#elif direction == "right":
-			#self.x_speed = 10
+		if direction == None:
+			self.y_speed = -self.y_speed
+		elif direction == "left":
+			self.x_speed = -3
+			
+		elif direction == "right":
+			self.x_speed = 3
+			
 
 class Board:
 	def __init__(self):
 		width = 30
 		left = screen_size/2-0.5*width
-		self.rect = pygame.Rect(left,560,70,5)
+		self.rect = pygame.Rect(left,560,300,5)
 
 	def draw(self):
 		pygame.draw.rect(screen,white,self.rect,0)
 
-	def move(self,direction):
+	def move(self,direction): # constarint the moving range
 		if direction == "left":
 			self.rect.move_ip(-10,0)
 		else:
