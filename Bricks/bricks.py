@@ -52,7 +52,7 @@ class Game:
 			if self.if_game_lose():
 				self.game_play = False
 
-			print(self.ball.x_speed,self.ball.y_speed)
+			
 			pygame.display.update()
 			screen.fill(black)
 
@@ -120,18 +120,30 @@ class Ball: # single ball
 
 class Board:
 	def __init__(self):
-		width = 30
-		left = screen_size/2-0.5*width
-		self.rect = pygame.Rect(left,560,300,5)
+		self.width = 300
+		self.left = screen_size/2-0.5*self.width
+		self.top = 560
+		self.rect = pygame.Rect(self.left,self.top,self.width,5)
+		self.x_speed = 50
+		self.y_speed = 0
 
 	def draw(self):
 		pygame.draw.rect(screen,white,self.rect,0)
 
-	def move(self,direction): # constarint the moving range
+	def move(self,direction): # constraint the moving range
 		if direction == "left":
-			self.rect.move_ip(-10,0)
+			if self.x_speed > self.left:
+				self.x_speed = self.left
+		
+			print(self.x_speed)
+			self.rect.move_ip(-self.x_speed,self.y_speed)
+			
 		else:
-			self.rect.move_ip(10,0)
+			if self.x_speed > screen_size-(self.left + self.width):
+				self.x_speed = screen_size-(self.left + self.width)
+			
+			self.rect.move_ip(self.x_speed,self.y_speed)
+			
 
 
 
