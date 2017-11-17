@@ -43,11 +43,11 @@ class Game:
 			self.ball.draw()
 			self.ball.move()
 			self.ball.bounce_edge()
-			self.ball_bounce_board()
+			
 			self.board.draw()
 			self.get_key()
-			self.ball_bounce_board()
-			self.board_is_moving = False
+			if self.if_ball_hit_board():
+				self.ball.bounce_board()
 			pygame.display.update()
 			screen.fill(black)
 
@@ -65,9 +65,12 @@ class Game:
 					#self.ball_bounce_board("right")
 
 
-	def ball_bounce_board(self):
+	def if_ball_hit_board(self):
 		if self.board.rect.collidepoint(self.ball.x_coord,self.ball.y_coord):
-			self.ball.bounce_board()
+			return True
+
+	def if_game_lose(self):
+		
 
 
 
