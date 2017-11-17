@@ -1,4 +1,5 @@
 import pygame,sys,random
+import sqlite3
 pygame.init()
 pygame.font.init()
 
@@ -13,6 +14,7 @@ green = (0,100,0)
 bright_green = (0,255,0)
 red = (255,0,0)
 grey = (205,201,201)
+dark_grey = (102,102,153)
 yellow = (255,255,0)
 purple = (160,32,240)
 #size setting 
@@ -52,10 +54,14 @@ class Game:
 		self.brick_list = []
 		self.score = 0
 		self.level = 1
+		self.highest_score = self.get_highest_score()
 
-	def create_bricks(self):
+	def create_bricks(self,level):
 		top = 50
-		for i in range(6):
+		height = level + 2
+		if height >16:
+			height = 16
+		for i in range(height):
 			left = brick_width
 			for j in range((screen_size-2*brick_width)//brick_width):
 				r = random.randint(0,255)
@@ -68,13 +74,13 @@ class Game:
 			top += brick_height
 
 	def show_score(self):
-		font_size = 40
+		font_size = 35
 		coords = (10,10)
 		draw_text("Score:%d"%self.score,font_size,coords,grey)
 
 	def show_level(self):
-		font_size = 40
-		coords = (250,10)
+		font_size = 35
+		coords = (170,10)
 		draw_text("Level:%d"%self.level,font_size,coords,grey)
 
 
@@ -83,7 +89,7 @@ class Game:
 			brick.draw()
 
 	def play(self):
-		self.create_bricks()
+		self.create_bricks(self.level)
 		pygame.mixer.music.play(0,0)
 		while self.game_play:
 			clock.tick(FPS)
@@ -95,6 +101,8 @@ class Game:
 			self.board.draw()
 			self.show_score()
 			self.show_level()
+			self.show_highest_score()
+
 			self.get_key()
 			if self.if_ball_hit_board():
 				self.ball.bounce_board()
@@ -103,7 +111,9 @@ class Game:
 				self.ball.bounce_brick()
 
 			if self.if_game_lose():
-				if self.end_screen():
+				prev_high_score = self.get_highest_score()
+				self.store_into_database()
+				if self.end_screen(prev_high_score):
 					main()
 				self.game_play = False
 			if self.if_win():
@@ -113,15 +123,15 @@ class Game:
 			pygame.display.update()
 			screen.blit(back_groung_pic,(0,0))
 
-	def end_screen(self):
+	def end_screen(self,prev_high_score):
 		
-		#show_congrats = (self.score>prev_high_score)
+		show_congrats = (self.score>prev_high_score)
 		while 1:
 			screen.blit(back_groung_pic,(0,0))
-			#if show_congrats:
-				#draw_text("New Highest Score Reached",40,(128,100),blue)
-			    #draw_text("You Final Score:%d"%self.score,40,(170,200),blue)
-			draw_text("Play Again Y/N",30,(230,300),grey)
+			if show_congrats:
+				draw_text("New Highest Score Reached",45,(115,100),grey)
+			draw_text("You Final Score:%d"%self.score,45,(170,200),grey)
+			draw_text("Play Again Y/N",45,(200,300),grey)
 			pygame.display.update()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN:
@@ -147,6 +157,20 @@ class Game:
 					if self.if_ball_hit_board():
 						self.ball.bounce_board("right")
 
+	def get_highest_score(self):
+		cursor.execute("select max(score) from score;")
+		row = cursor.fetchone()
+		if row[0] == None:
+			highest_score = 0
+		else:
+			highest_score = row[0]
+		return highest_score
+
+	def show_highest_score(self):
+		font_size = 35
+		coords = (300,10)
+		draw_text("Highest Score:%d"%self.highest_score,font_size,coords,grey)
+
 
 	def if_ball_hit_board(self):
 		if self.board.rect.collidepoint(self.ball.x_coord,self.ball.y_coord):
@@ -166,9 +190,21 @@ class Game:
 	def if_win(self):
 		return len(self.brick_list) == 0
 
+	def store_into_database(self):
+		cursor.execute("select count(*) from score;")
+		row = cursor.fetchone()
+
+		if row == None:
+			new_pid = 1
+		else:
+			new_pid = row[0] + 1
+		data_record = (new_pid,self.score,self.level)
+		cursor.execute("insert into score values (?,?,?);",data_record)
+		connection.commit()
+
 	def restart_game(self):
-		self.create_bricks()
 		self.level += 1
+		self.create_bricks(self.level)
 		self.ball.reset()
 
 class Brick: # single brick
@@ -196,7 +232,7 @@ class Ball: # single ball
 
 	def draw(self):
 	
-		pygame.draw.circle(screen,black,(self.x_coord,self.y_coord),self.radius,0)
+		pygame.draw.circle(screen,grey,(self.x_coord,self.y_coord),self.radius,0)
 		pygame.draw.circle(screen,yellow,(self.x_coord,self.y_coord),self.radius,1)
 
 	def move(self):
