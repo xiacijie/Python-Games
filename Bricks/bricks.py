@@ -6,7 +6,8 @@ pygame.font.init()
 #RBG color setting
 black = (0,0,0)
 white = (255,255,255)
-blue = (25,25,112)
+deep_blue = (25,25,112)
+blue = (0,0,255)
 green = (0,100,0)
 red = (255,0,0)
 grey = (205,201,201)
@@ -16,6 +17,8 @@ purple = (160,32,240)
 screen_size = 600
 seg_size = 15
 speed = 0.36
+brick_width = 100
+brick_height = 20
 FPS = 60
 #initialize screen
 screen = pygame.display.set_mode((screen_size,screen_size))
@@ -35,11 +38,28 @@ class Game:
 		self.ball = Ball()
 		self.game_play  = True
 		self.board = Board()
+		self.brick_list = []
 
+	def create_bricks(self):
+		top = 0
+		for i in range(5):
+			left = 0
+			for j in range(screen_size//brick_width):
+				new_brick = Brick(left,top,white)
+				self.brick_list.append(new_brick)
+				left += brick_width
+			top += brick_height
+
+	def draw_bricks(self):
+		for brick in self.brick_list:
+			brick.draw()
 
 	def play(self):
+		self.create_bricks()
+
 		while self.game_play:
 			clock.tick(FPS)
+			self.draw_bricks()
 			self.ball.draw()
 			self.ball.move()
 			self.ball.bounce_edge()
@@ -48,6 +68,9 @@ class Game:
 			self.get_key()
 			if self.if_ball_hit_board():
 				self.ball.bounce_board()
+
+			if self.if_ball_hit_brick():
+				self.ball.bounce_brick()
 
 			if self.if_game_lose():
 				self.game_play = False
@@ -80,11 +103,26 @@ class Game:
 		if self.ball.y_coord > screen_size:
 			return True
 
+	def if_ball_hit_brick(self):
+		for brick in self.brick_list:
+			if brick.rect.collidepoint(self.ball.x_coord,self.ball.y_coord):
+				self.brick_list.remove(brick)
+				return True
 
 
 class Brick: # single brick
-	def __init__(self):
-		pass
+	def __init__(self,left,top,color):
+		#self.left = left
+		#self.top = top
+		self.color = color
+		
+		self.rect = pygame.Rect(left,top,brick_width,brick_height)
+
+	def draw(self):
+		pygame.draw.rect(screen,blue,self.rect,0) # draw bricks
+		pygame.draw.rect(screen,deep_blue,self.rect,1) #draw the border
+
+
 
 class Ball: # single ball
 	def __init__(self):
@@ -116,6 +154,9 @@ class Ball: # single ball
 			
 		elif direction == "right":
 			self.x_speed = 3
+
+	def bounce_brick(self):
+		self.y_speed = -self.y_speed
 			
 
 class Board:
