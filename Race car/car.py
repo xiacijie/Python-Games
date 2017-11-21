@@ -44,21 +44,42 @@ class Game:
 	def __init__(self):
 		self.border = Border()
 		self.central = Central_line()
+		self.your_car = Your_car() 
+		self.enemy_car = Enemy_car()
 
+	def draw_objects(self):
+		self.border.draw()
+		self.central.draw()
+		self.your_car.draw()
+		self.enemy_car.draw()
 
 	def play(self):
 		while True:
 			clock.tick(FPS)
-			self.border.draw()
-			self.central.draw()
+			self.draw_objects()
+			self.update_objects()
 			self.get_key()
 			pygame.display.update()
 			screen.fill(black)
 
+	def update_objects(self):
+		self.enemy_car.move()
+
 	def get_key(self): #Get the user input through the key board
+
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sys.exit()
+
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_UP: 
+					self.your_car.move("up")
+				elif event.key == pygame.K_DOWN:
+					self.your_car.move("down")			
+				elif event.key == pygame.K_LEFT:
+					self.your_car.move("left")
+				elif event.key == pygame.K_RIGHT:
+					self.your_car.move("right")
 
 class Segment:
 	def __init__(self,left,top,width,height):
@@ -154,6 +175,53 @@ class Central_line:
 
 class Your_car:
 	def __init__(self):
-		self.rect = pygame.Rect()
+		car_size = 60
+		left = screen_size//2 - car_size//2
+		top = screen_size - car_size
+		self.rect = pygame.Rect(left,top,car_size,car_size)
+		self.speed = 3
+
+
+	def draw(self):
+		pygame.draw.rect(screen,blue,self.rect,0)
+
+	def move(self,direction): #TO BE COMPLETED: CONSTRAINT THE MOVING RANGE!!!
+		x_speed = 0
+		y_speed = 0
+		if direction == "up":
+			y_speed = -self.speed
+
+		elif direction == "down":
+			y_speed = self.speed
+
+		elif direction == "left":
+			x_speed = -self.speed
+
+		elif direction == "right":
+			x_speed = self.speed
+
+		self.rect.move_ip(x_speed,y_speed)
+
+
+class Enemy_car: # TO be completed, randomly generate cars
+
+	def __init__(self):
+		car_size = 60
+		pos1 = screen_size//2 - car_size//2
+		pos2 = screen_size//4 + screen_size//12 -car_size//2
+		pos3 = screen_size//4 + 4*(screen_size//12) - car_size//2
+		left_pos = [pos1,pos2,pos3]
+		
+		top = 0
+		self.rect = pygame.Rect(pos2,top,car_size,car_size)
+		self.speed = 2
+
+	def draw(self):
+		pygame.draw.rect(screen,blue,self.rect,0)
+
+	def move(self):
+		self.rect.move_ip(0,self.speed)
+
+
 
 main()
