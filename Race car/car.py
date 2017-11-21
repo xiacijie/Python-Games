@@ -43,12 +43,17 @@ class Game:
 
 	def __init__(self):
 		self.border = Border()
+		self.central = Central_line()
 
 
 	def play(self):
 		while True:
+			clock.tick(FPS)
 			self.border.draw()
+			self.central.draw()
 			self.get_key()
+			pygame.display.update()
+			screen.fill(black)
 
 	def get_key(self): #Get the user input through the key board
 		for event in pygame.event.get():
@@ -60,40 +65,90 @@ class Segment:
 		self.rect = pygame.Rect(left,top,width,height)
 
 class Border:
+
 	def __init__(self):
 		self.left_border = []
 		self.right_border = []
+		self.create_border()
 
 	def create_border(self):
-		height = 30
-		white_space = 30
+		height = 40
 		top = 0
 		width = 10
 		# create left border
-		for i in range(screen_size//(height+white_space)):
+		for i in range(screen_size//(height)):
 			segment = Segment(screen_size//4,top,width,height)
 			self.left_border.append(segment)
-			top += white_space
+			top += height
+			
 
 		#create right border
 		top = 0
-		for i in range(screen_size//(height+white_space)):
+		for i in range(screen_size//(height)):
 			segment = Segment(3*(screen_size//4),top,width,height)
 			self.right_border.append(segment)
-			top += white_space
+			top += height
 		
 	def draw(self):
-		for seg in self.left_border:
+		for i in range(len(self.left_border)):
+			seg = self.left_border[i]
+			#if i %2 == 0:
 			pygame.draw.rect(screen,white,seg.rect,0)
-		for seg in self.right_border:
-			pygame.draw.rect(screen,white,seg.rect,0)
+			#else:
+				#pygame.draw.rect(screen,black,seg.rect,0)
 
+		for i in range(len(self.right_border)):
+			seg = self.right_border[i]
+			#if i %2 == 0:
+			pygame.draw.rect(screen,white,seg.rect,0)
+			#else:
+				#pygame.draw.rect(screen,black,seg.rect,0)
 
 
 
 
 class Central_line:
 	def __init__(self):
+
+		self.left_central = []
+		self.right_central = []
+		self.create_central()
+
+	def create_central(self):
+
+		height = 40
+		top = 0
+		width = 3
+
+		# create left central
+		for i in range(screen_size//(height)):
+			segment = Segment((screen_size//4)+(screen_size//2//3),top,width,height)
+			self.left_central.append(segment)
+			top += height
+			
+
+		#create right border
+		top = 0
+		for i in range(screen_size//(height)):
+			segment = Segment((screen_size//4)+(2*(screen_size//2//3)),top,width,height)
+			self.right_central.append(segment)
+			top += height
+
+	def draw(self):
+		for i in range(len(self.left_central)):
+			seg = self.left_central[i]
+			if i %2 == 0:
+				pygame.draw.rect(screen,white,seg.rect,0)
+			else:
+				pygame.draw.rect(screen,black,seg.rect,0)
+
+		for i in range(len(self.right_central)):
+			seg = self.right_central[i]
+			if i %2 == 0:
+				pygame.draw.rect(screen,white,seg.rect,0)
+			else:
+				pygame.draw.rect(screen,black,seg.rect,0)
+
 
 
 
