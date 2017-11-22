@@ -1,5 +1,6 @@
 import pygame,sys,random
 import sqlite3
+import time
 pygame.init()
 pygame.font.init()
 
@@ -45,13 +46,34 @@ class Game:
 		self.border = Border()
 		self.central = Central_line()
 		self.your_car = Your_car() 
-		self.enemy_car = Enemy_car()
+		
+		self.enemy_car_list = []
+
+		self.start_time = time.time()
 
 	def draw_objects(self):
 		self.border.draw()
 		self.central.draw()
 		self.your_car.draw()
-		self.enemy_car.draw()
+		self.draw_enemy_cars()
+
+	def create_enemy_cars(self):
+		
+		if len(self.enemy_car_list) < 2:
+			self.enemy_car_list.append(Enemy_car())
+
+	def draw_enemy_cars(self):
+		for car in self.enemy_car_list:
+			car.draw()
+
+	def move_enemy_cars(self):
+		for car in self.enemy_car_list:
+			car.move()
+
+	def delete_enemy_cars(self):
+		for car in self.enemy_car_list:
+			if car.rect.top >screen_size:
+				self.enemy_car_list.remove(car)
 
 	def play(self):
 		while True:
@@ -63,7 +85,10 @@ class Game:
 			screen.fill(black)
 
 	def update_objects(self):
-		self.enemy_car.move()
+		self.move_enemy_cars()
+		self.create_enemy_cars()
+		self.delete_enemy_cars()
+
 
 	def get_key(self): #Get the user input through the key board
 
@@ -209,11 +234,13 @@ class Enemy_car: # TO be completed, randomly generate cars
 		car_size = 60
 		pos1 = screen_size//2 - car_size//2
 		pos2 = screen_size//4 + screen_size//12 -car_size//2
-		pos3 = screen_size//4 + 4*(screen_size//12) - car_size//2
+		pos3 = screen_size//4 + 5*(screen_size//12) - car_size//2
 		left_pos = [pos1,pos2,pos3]
+		pos = random.choice(left_pos)
+
 		
 		top = 0
-		self.rect = pygame.Rect(pos2,top,car_size,car_size)
+		self.rect = pygame.Rect(pos,top,car_size,car_size)
 		self.speed = 2
 
 	def draw(self):
