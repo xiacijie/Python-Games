@@ -26,6 +26,7 @@ screen = pygame.display.set_mode((screen_size,screen_size))
 clock = pygame.time.Clock()
 back_groung_pic = pygame.image.load("grass.jpg")
 pygame.mixer.music.load("back1.mp3")
+
 #Connection to the database
 connection = None
 cursor = None
@@ -59,6 +60,7 @@ class Game:
 		self.score_add = 5
 		self.stored_length = 0
 		self.fps = FPS
+		self.highest_score = self.get_highest_score()
 
 	def show_score(self,coords,font_size):
 		self.score = self.snake.length * self.score_add - 20
@@ -81,7 +83,7 @@ class Game:
 		return highest_score
 
 	def show_highest_score(self,coords,font_size):
-		draw_text("Highest Score:%d"%self.get_highest_score(),font_size,coords,blue)
+		draw_text("Highest Score:%d"%self.highest_score,font_size,coords,blue)
 
 
 
@@ -93,6 +95,7 @@ class Game:
 	def play(self):
 		pygame.mixer.music.play(0,0)
 		self.apple.randomize()
+		
 		for i in range(0,3):
 			self.snake.snake_grow()
 		while self.game_play:
@@ -318,6 +321,7 @@ class Apple:
 
 	def draw(self):
 		pygame.draw.rect(screen,red,self.rect,15)
+
 	def randomize(self):
 		left = random.randint(15,screen_size-15)
 		top = random.randint(35,screen_size-15)
