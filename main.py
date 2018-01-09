@@ -27,6 +27,7 @@ def main():
 	ui = Ui()
 	ui.run()
 
+#draw text on screen
 def draw_text(content,font_size,coords,color):
 	myfont = pygame.font.SysFont(None,font_size)
 	textsurface = myfont.render(content,1,color)
@@ -43,7 +44,7 @@ class Ui:
 
 
 	#draw the button
-	def draw(self):
+	def draw_button(self):
 		pygame.draw.rect(screen,white,self.first_button,0)
 
 	#detect whether to end the screen
@@ -55,7 +56,7 @@ class Ui:
 	def run(self):
 		while self.ui_run:
 			screen.fill(black)
-			self.draw()
+			self.draw_button()
 			self.get_key()
 			
 			pygame.display.update()
