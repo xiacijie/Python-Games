@@ -1,4 +1,4 @@
-A collection of classic games built by pygame
+A collection of classic games built by pygame in python
 ---------------------------------------------
 
 
@@ -23,6 +23,18 @@ How to start
 
 Screenshots
 -----------
+-Race Car
+
+![alt text](./resource/car1.png)
+![alt text](./resource/car2.png)
+
+-Bricks
+
+![alt text](./resource/brick1.png)
+
+-Snake
+
+![alt text](./resource/snake1.png)
 
 Game Help
 ---------
