@@ -274,6 +274,19 @@ class Your_car:
 		elif direction == "right":
 			x_speed = self.speed
 
+		# restrict the moving range
+		top = self.rect.top
+		bottom = self.rect.bottom
+		left = self.rect.left
+		right = self.rect.right
+		if (left-left_border_pos < -x_speed):
+			x_speed = -(left-left_border_pos)
+		if (right_border_pos - right < x_speed):
+			x_speed = right_border_pos - right
+		if (top < -y_speed):
+			y_speed = -top
+		if (screen_size - bottom < y_speed):
+			y_speed = screen_size - bottom
 		self.rect.move_ip(x_speed,y_speed)
 
 
