@@ -1,40 +1,8 @@
-import pygame,sys,random
-import sqlite3
-import time
-pygame.init()
-pygame.font.init()
-
-
-#RBG color setting
-black = (0,0,0)
-white = (255,255,255)
-deep_blue = (25,25,112)
-blue = (0,0,255)
-shalow_blue = (0,153,255)
-green = (0,100,0)
-bright_green = (0,255,0)
-red = (255,0,0)
-grey = (205,201,201)
-dark_grey = (102,102,153)
-yellow = (255,255,0)
-purple = (160,32,240)
-#size setting 
-screen_size = 600
-seg_size = 15
-speed = 0.36
-brick_width = 50
-brick_height = 20
-FPS = 60
-#initialize screen
-screen = pygame.display.set_mode((screen_size,screen_size))
-pygame.key.set_repeat(10,5)
-clock = pygame.time.Clock()
-#back_groung_pic = pygame.image.load("back.jpg")
-#pygame.mixer.music.load("back.mp3")
-#Connection to the database
-connection = None
-cursor = None
-
+import sys
+sys.path.append('../common')
+from common import *
+left_border_pos = screen_size//4;
+right_border_pos = (screen_size // 4) * 3
 def main():
 	game = Game()
 	game.play()
@@ -58,9 +26,21 @@ class Game:
 		self.draw_enemy_cars()
 
 	def create_enemy_cars(self):
-		
-		if len(self.enemy_car_list) < 2:
-			self.enemy_car_list.append(Enemy_car())
+		car_size = 60
+		pos1 = screen_size//2 - car_size//2
+		pos2 = screen_size//4 + screen_size//12 -car_size//2
+		pos3 = screen_size//4 + 5*(screen_size//12) - car_size//2
+		left_pos = [pos1,pos2,pos3]
+		if (len(self.enemy_car_list) == 0):
+
+			while len(self.enemy_car_list) < 2:
+				
+				pos = random.choice(left_pos)
+				print(pos)
+				print(left_pos)
+				print("---------------------")
+				left_pos.remove(pos)
+				self.enemy_car_list.append(Enemy_car(pos,car_size))
 
 	def draw_enemy_cars(self):
 		for car in self.enemy_car_list:
@@ -123,7 +103,7 @@ class Border:
 		width = 10
 		# create left border
 		for i in range(screen_size//(height)):
-			segment = Segment(screen_size//4,top,width,height)
+			segment = Segment(left_border_pos,top,width,height)
 			self.left_border.append(segment)
 			top += height
 			
@@ -131,7 +111,7 @@ class Border:
 		#create right border
 		top = 0
 		for i in range(screen_size//(height)):
-			segment = Segment(3*(screen_size//4),top,width,height)
+			segment = Segment(right_border_pos,top,width,height)
 			self.right_border.append(segment)
 			top += height
 		
@@ -230,13 +210,8 @@ class Your_car:
 
 class Enemy_car: # TO be completed, randomly generate cars
 
-	def __init__(self):
-		car_size = 60
-		pos1 = screen_size//2 - car_size//2
-		pos2 = screen_size//4 + screen_size//12 -car_size//2
-		pos3 = screen_size//4 + 5*(screen_size//12) - car_size//2
-		left_pos = [pos1,pos2,pos3]
-		pos = random.choice(left_pos)
+	def __init__(self,pos,car_size):
+		
 
 		
 		top = 0
