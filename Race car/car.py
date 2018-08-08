@@ -7,11 +7,16 @@ right_border_pos = (screen_size // 4) * 3
 car_width = 50
 car_height = 100
 
-enemy_car_image = pygame.image.load("enemy_car.png")
-enemy_car_image = pygame.transform.scale(enemy_car_image, (car_width, car_height))
+enemy_car_image1 = pygame.image.load("enemy_car.png")
+enemy_car_image1 = pygame.transform.scale(enemy_car_image1, (car_width, car_height))
+enemy_car_image2 = pygame.image.load("enemy_car2.png")
+enemy_car_image2 = pygame.transform.scale(enemy_car_image2, (car_width, car_height))
+enemy_car_list = [enemy_car_image1,enemy_car_image2]
 
 your_car_image = pygame.image.load("your_car.png")
 your_car_image = pygame.transform.scale(your_car_image,(car_width,car_height))
+background_image = pygame.image.load("boom.png")
+background_image = pygame.transform.scale(background_image,(screen_size,screen_size))
 
 def main():
 	game = Game()
@@ -60,7 +65,7 @@ class Game:
 	
 	def update_level(self):
 		
-		if (int(self.time) != 0 and int(self.time) % 5  == 0 ):
+		if (int(self.time) != 0 and int(self.time) % 10  == 0 ):
 			if (not self.recent_update):
 
 				self.level += 1
@@ -129,12 +134,37 @@ class Game:
 			self.update_game_status()
 			pygame.display.update()
 			screen.fill(black)
+		# when the game ends
+		self.end_screen()
+		
+	def end_screen(self):
+		while (not self.game_play):
+			clock.tick(FPS)
+			screen.blit(background_image,(0,0))
+			draw_text("GAME OVER",50,(screen_size//2 - 100,250),black)
+			draw_text("Your Score is %d s" % self.time,50,(screen_size//2 - 130,300),black)
+			draw_text("Play Again? Y/N",50,(screen_size//2 - 120,350),black)
+			pygame.display.update()
+			screen.fill(black)
+			self.get_end_key()
+			
 
 	def update_objects(self):
 		self.move_enemy_cars()
 		self.create_enemy_cars()
 		self.delete_enemy_cars()
 
+	def get_end_key(self):
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				sys.exit()
+
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_y: 
+					main()
+				elif event.key == pygame.K_n:
+					sys.exit()			
+				
 
 	def get_key(self): #Get the user input through the key board
 
@@ -250,7 +280,7 @@ class Your_car:
 		left = screen_size//2 - car_width//2
 		top = screen_size - car_height
 		self.rect = pygame.Rect(left,top,car_width,car_height)
-		self.speed = 3
+		self.speed = 4
 
 
 
@@ -300,9 +330,13 @@ class Enemy_car: # TO be completed, randomly generate cars
 		self.pos = pos
 		self.rect = pygame.Rect(pos,top,car_width,car_height)
 		self.speed = speed
+		self.image = enemy_car_image1
+		if (speed >= 5):
+			self.image = enemy_car_image2
+		
 
 	def draw(self):
-		screen.blit(enemy_car_image,self.rect)
+		screen.blit(self.image,self.rect)
 
 	def move(self):
 		self.rect.move_ip(0,self.speed)
