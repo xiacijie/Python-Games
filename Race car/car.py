@@ -4,10 +4,19 @@ from common import *
 
 left_border_pos = screen_size//4
 right_border_pos = (screen_size // 4) * 3
+car_width = 50
+car_height = 100
+
+enemy_car_image = pygame.image.load("enemy_car.png")
+enemy_car_image = pygame.transform.scale(enemy_car_image, (car_width, car_height))
+
+your_car_image = pygame.image.load("your_car.png")
+your_car_image = pygame.transform.scale(your_car_image,(car_width,car_height))
 
 def main():
 	game = Game()
 	game.play()
+
 
 
 class Game:
@@ -16,10 +25,15 @@ class Game:
 		self.border = Border()
 		self.central = Central_line()
 		self.your_car = Your_car() 
-		
+		# how may enemy cars
+		self.car_num = 2
+		self.start_time = time.time()
 		self.enemy_car_list = []
 		self.game_play = True
 		self.start_time = time.time()
+		self.recent_update = False # for level
+		self.level = 1
+
 
 	def update_game_status(self):
 
@@ -28,6 +42,7 @@ class Game:
 
 		self.draw_objects()
 		self.update_objects()
+		self.update_level()
 		self.get_key()
 
 	# detect if your car collides with enemy's car => lose
@@ -36,29 +51,64 @@ class Game:
 			if self.your_car.rect.colliderect(c.rect):
 				return True
 
+	def draw_time(self):
+		self.time = time.time() - self.start_time
+		draw_text("Time: %ds"%(self.time),30,(30,30),white)
+
+	def draw_level(self):
+		draw_text("Level: %d"%(self.level),30,(screen_size-100,30),white)
+	
+	def update_level(self):
+		
+		if (int(self.time) != 0 and int(self.time) % 5  == 0 ):
+			if (not self.recent_update):
+
+				self.level += 1
+				self.car_num += 1
+				self.recent_update = True
+		else:
+			self.recent_update = False
+
 
 	def draw_objects(self):
+		self.draw_time()
+		self.draw_level()
 		self.border.draw()
 		self.central.draw()
 		self.your_car.draw()
 		self.draw_enemy_cars()
 
 	def create_enemy_cars(self):
-		car_size = 60
-		pos1 = screen_size//2 - car_size//2
-		pos2 = screen_size//4 + screen_size//12 -car_size//2
-		pos3 = screen_size//4 + 5*(screen_size//12) - car_size//2
+		
+		pos1 = screen_size//2 - car_width//2
+		pos2 = screen_size//4 + screen_size//12 -car_width//2
+		pos3 = screen_size//4 + 5*(screen_size//12) - car_width//2
 		left_pos = [pos1,pos2,pos3]
-		if (len(self.enemy_car_list) == 0):
 
-			while len(self.enemy_car_list) < 2:
-				
+
+		speed_list = [1,3,3,3,3,5,6,8]
+		
+
+		
+
+		while len(self.enemy_car_list) < self.car_num:
+			# detect no two cars have the same position
+			while (True):
 				pos = random.choice(left_pos)
-				print(pos)
-				print(left_pos)
-				print("---------------------")
-				left_pos.remove(pos)
-				self.enemy_car_list.append(Enemy_car(pos,car_size))
+				for car in self.enemy_car_list:
+					if (pos == car.pos):
+						continue
+				break
+			# detect not two cars have the same speed
+			while (True):
+				speed = random.choice(speed_list)
+				for car in self.enemy_car_list:
+					if (speed == car.speed):
+						continue
+				break
+			
+			
+			self.enemy_car_list.append(Enemy_car(pos,speed))
 
 	def draw_enemy_cars(self):
 		for car in self.enemy_car_list:
@@ -75,7 +125,7 @@ class Game:
 
 	def play(self):
 		while self.game_play:
-			clock.tick(100)
+			clock.tick(FPS)
 			self.update_game_status()
 			pygame.display.update()
 			screen.fill(black)
@@ -196,15 +246,18 @@ class Central_line:
 
 class Your_car:
 	def __init__(self):
-		car_size = 60
-		left = screen_size//2 - car_size//2
-		top = screen_size - car_size
-		self.rect = pygame.Rect(left,top,car_size,car_size)
+		
+		left = screen_size//2 - car_width//2
+		top = screen_size - car_height
+		self.rect = pygame.Rect(left,top,car_width,car_height)
 		self.speed = 3
 
 
+
 	def draw(self):
-		pygame.draw.rect(screen,blue,self.rect,0)
+		screen.blit(your_car_image,(self.rect))
+		# pygame.Surface.blit(image, screen, (100,100))
+		# pygame.draw.rect(screen,blue,self.rect,0)
 
 	def move(self,direction): #TO BE COMPLETED: CONSTRAINT THE MOVING RANGE!!!
 		x_speed = 0
@@ -226,16 +279,17 @@ class Your_car:
 
 class Enemy_car: # TO be completed, randomly generate cars
 
-	def __init__(self,pos,car_size):
+	def __init__(self,pos,speed):
 		
 
 		
 		top = 0
-		self.rect = pygame.Rect(pos,top,car_size,car_size)
-		self.speed = 2
+		self.pos = pos
+		self.rect = pygame.Rect(pos,top,car_width,car_height)
+		self.speed = speed
 
 	def draw(self):
-		pygame.draw.rect(screen,blue,self.rect,0)
+		screen.blit(enemy_car_image,self.rect)
 
 	def move(self):
 		self.rect.move_ip(0,self.speed)
