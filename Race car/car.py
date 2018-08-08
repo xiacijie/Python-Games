@@ -1,8 +1,10 @@
 import sys
 sys.path.append('../common')
 from common import *
-left_border_pos = screen_size//4;
+
+left_border_pos = screen_size//4
 right_border_pos = (screen_size // 4) * 3
+
 def main():
 	game = Game()
 	game.play()
@@ -16,8 +18,24 @@ class Game:
 		self.your_car = Your_car() 
 		
 		self.enemy_car_list = []
-
+		self.game_play = True
 		self.start_time = time.time()
+
+	def update_game_status(self):
+
+		if (self.detect_collide()):
+			self.game_play = False
+
+		self.draw_objects()
+		self.update_objects()
+		self.get_key()
+
+	# detect if your car collides with enemy's car => lose
+	def detect_collide(self):
+		for c in self.enemy_car_list:
+			if self.your_car.rect.colliderect(c.rect):
+				return True
+
 
 	def draw_objects(self):
 		self.border.draw()
@@ -56,11 +74,9 @@ class Game:
 				self.enemy_car_list.remove(car)
 
 	def play(self):
-		while True:
-			clock.tick(FPS)
-			self.draw_objects()
-			self.update_objects()
-			self.get_key()
+		while self.game_play:
+			clock.tick(100)
+			self.update_game_status()
 			pygame.display.update()
 			screen.fill(black)
 
