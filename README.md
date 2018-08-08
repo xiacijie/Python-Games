@@ -1,15 +1,45 @@
-# Classic-Games
-# A collection of Classic Games implemented by Python with world's ugliest Graphic User Interface.......
-# However， it is Still under construction!!!
-
-# Game overview
-## Classic Snake Game
-![screenshot from 2018-01-10 16-49-15](https://user-images.githubusercontent.com/27936587/34801955-710d7a86-f628-11e7-8d09-062b08bd8c49.png)
-![screenshot from 2018-01-10 16-49-31](https://user-images.githubusercontent.com/27936587/34801956-724dc57c-f628-11e7-96e3-ed50fded2c38.png)
+A collection of classic games built by pygame in python
+---------------------------------------------
 
 
-## Classic Bricks Game
-![screenshot from 2018-01-10 16-38-38](https://user-images.githubusercontent.com/27936587/34801986-8ae9a42a-f628-11e7-9c4f-f525567bbf42.png)
-![screenshot from 2018-01-10 16-39-06](https://user-images.githubusercontent.com/27936587/34801989-8b82cf6a-f628-11e7-8122-e1d6d3e818d6.png)
+Requirements
+------------
+```
+bash
+python3
+pygame
+```
 
+Prepare the environment
+-----------------------
+`pip install pygame`
 
+How to start
+------------
+1. Clone this project: `git clone https://github.com/xiacijie/Classic-Games.git`
+2. Enter the project: `cd Classic-Games`
+3. Enter the respective folder: `cd XXX`
+4. Start the game: `python3 XXX.py`
+
+Screenshots
+-----------
+-Race Car
+
+![alt text](./resource/car1.png)
+![alt text](./resource/car2.png)
+
+-Bricks
+
+![alt text](./resource/brick1.png)
+
+-Snake
+
+![alt text](./resource/snake1.png)
+
+Game Help
+---------
+By pressing <kbd>up</kbd>, <kbd>down</kbd>, <kbd>left</kbd>, <kbd>right</kbd> to control the characters moving around.
+
+Join the project
+----------------
+Feel free to join this project.
