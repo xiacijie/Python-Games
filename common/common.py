@@ -34,3 +34,9 @@ cursor = None
 
 pygame.init()
 pygame.font.init()
+
+# draw the string to the screen
+def draw_text(content,font_size,coords,color):
+	myfont = pygame.font.SysFont(None,font_size)
+	textsurface = myfont.render(content,1,color)
+	screen.blit(textsurface,coords)
