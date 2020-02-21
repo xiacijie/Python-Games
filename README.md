@@ -40,6 +40,3 @@ Game Help
 ---------
 By pressing <kbd>up</kbd>, <kbd>down</kbd>, <kbd>left</kbd>, <kbd>right</kbd> to control the characters moving around.
 
-Join the project
-----------------
-Feel free to join this project.
