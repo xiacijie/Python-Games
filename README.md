@@ -1,4 +1,4 @@
-Classic Atari games built by pygame in python
+games built by pygame in python
 ---------------------------------------------
 
 
